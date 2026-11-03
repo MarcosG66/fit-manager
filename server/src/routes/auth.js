@@ -9,11 +9,10 @@ import { HttpError, asyncHandler, validate } from '../utils/http.js';
 import { authenticate, signSession, clearSession } from '../middleware/auth.js';
 import { sendResetCode } from '../services/mail.js';
 import { createLinkCode } from '../utils/links.js';
+import { hashRecoveryCode, generateRecoveryCode, isRecoveryCodeUsable } from '../utils/recovery.js';
 
 const router = Router();
 const SALT_ROUNDS = 12;
-const RESET_CODE_LENGTH = 8;
-const MAX_RESET_ATTEMPTS = 5;
 
 // Todas as rotas de autenticação utilizam o mesmo formato de e-mail e senha.
 const emailSchema = z.string().trim().email().max(190).transform(email => email.toLowerCase());
@@ -43,50 +42,56 @@ const resetPasswordSchema = z.object({
   novaSenha: passwordSchema,
 });
 
-// Limita tentativas sucessivas e reduz o risco de adivinhação de senhas/códigos.
-const authRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 15,
+// Cada fluxo possui seu próprio limite, evitando que operações diferentes
+// consumam a mesma cota. Os limites são aplicados por IP neste MVP.
+// Para múltiplas instâncias de produção, use um store compartilhado (Redis).
+const WINDOW_MS = 15 * 60 * 1000;
+
+const loginRateLimiter = rateLimit({
+  windowMs: WINDOW_MS,
+  limit: 10,
+  skipSuccessfulRequests: true,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
-  message: { error: 'Muitas tentativas. Tente novamente em alguns minutos.' },
+  message: {
+    error: 'Muitas tentativas de login. Aguarde até 15 minutos e tente novamente.',
+  },
+});
+
+const registerRateLimiter = rateLimit({
+  windowMs: WINDOW_MS,
+  limit: 5,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Muitos cadastros. Tente novamente mais tarde.' },
 });
 
 const recoveryRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: WINDOW_MS,
   limit: 5,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: { error: 'Aguarde antes de solicitar outro código.' },
 });
 
-/**
- * O código de recuperação nunca é guardado em texto puro no MySQL.
- * O HMAC combina o código com o ID do usuário e uma chave do servidor.
- */
-function hashRecoveryCode(usuarioId, codigo) {
-  return crypto.createHmac('sha256', process.env.RESET_SECRET)
-    .update(`${usuarioId}:${codigo}`)
-    .digest('hex');
-}
+const resetPasswordRateLimiter = rateLimit({
+  windowMs: WINDOW_MS,
+  limit: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Muitas tentativas de redefinição. Aguarde 15 minutos.' },
+});
 
-/** Cria um código numérico com oito dígitos, inclusive zeros à esquerda. */
-function generateRecoveryCode() {
-  return crypto.randomInt(0, 10 ** RESET_CODE_LENGTH)
-    .toString()
-    .padStart(RESET_CODE_LENGTH, '0');
-}
+const changePasswordRateLimiter = rateLimit({
+  windowMs: WINDOW_MS,
+  limit: 10,
+  skipSuccessfulRequests: true,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Muitas tentativas de alterar a senha. Aguarde 15 minutos.' },
+});
 
-/** Confere se o código ainda está ativo, dentro do prazo e das tentativas. */
-function isRecoveryCodeUsable(registro) {
-  if (!registro || registro.tentativas >= MAX_RESET_ATTEMPTS) return false;
-
-  // `dateStrings` do mysql2 retorna a data no formato "YYYY-MM-DD HH:mm:ss".
-  const expirationUtc = new Date(registro.expira_em.replace(' ', 'T') + 'Z');
-  return expirationUtc.getTime() > Date.now();
-}
-
-router.post('/register', authRateLimiter, asyncHandler(async (req, res) => {
+router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
   const dados = validate(registerSchema, req.body);
   // Cadastro de administrador exige código privado configurado no servidor.
   // O código NÃO é enviado ao front-end nem armazenado no banco.
@@ -155,7 +160,7 @@ router.post('/register', authRateLimiter, asyncHandler(async (req, res) => {
   res.status(201).json({ user: usuario });
 }));
 
-router.post('/login', authRateLimiter, asyncHandler(async (req, res) => {
+router.post('/login', loginRateLimiter, asyncHandler(async (req, res) => {
   const credenciais = validate(loginSchema, req.body);
 
   const [[usuarioEncontrado]] = await pool.execute(
@@ -241,24 +246,34 @@ router.post('/forgot-password', recoveryRateLimiter, asyncHandler(async (req, re
   const codigo = generateRecoveryCode();
   const codigoHash = hashRecoveryCode(usuario.id, codigo);
 
-  // Evita inutilizar o código antigo se o serviço de e-mail falhar.
-  await sendResetCode(usuario.email, codigo);
+  // Primeiro persiste o código: nunca chega um e-mail com um código ainda inexistente.
+  // Se o serviço de e-mail falhar, excluímos apenas o novo registro. O código
+  // anterior continua utilizável enquanto não expirar.
+  const [novoCodigo] = await pool.execute(
+    'INSERT INTO redefinicao_senha(usuario_id,codigo_hash,expira_em) VALUES(?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 10 MINUTE))',
+    [usuario.id, codigoHash],
+  );
 
-  await transaction(async conexao => {
-    await conexao.execute(
-      'UPDATE redefinicao_senha SET utilizado_em=NOW() WHERE usuario_id=? AND utilizado_em IS NULL',
-      [usuario.id],
-    );
-    await conexao.execute(
-      'INSERT INTO redefinicao_senha(usuario_id,codigo_hash,expira_em) VALUES(?,?,DATE_ADD(NOW(),INTERVAL 10 MINUTE))',
-      [usuario.id, codigoHash],
-    );
-  });
+  try {
+    await sendResetCode(usuario.email, codigo);
+  } catch (erroEnvio) {
+    try {
+      await pool.execute('DELETE FROM redefinicao_senha WHERE id=?', [novoCodigo.insertId]);
+    } catch (erroLimpeza) {
+      console.error('[AUTH] Falha ao remover código não enviado:', erroLimpeza);
+    }
+    throw erroEnvio;
+  }
+
+  await pool.execute(
+    'UPDATE redefinicao_senha SET utilizado_em=UTC_TIMESTAMP() WHERE usuario_id=? AND id<>? AND utilizado_em IS NULL',
+    [usuario.id, novoCodigo.insertId],
+  );
 
   res.json(respostaGenerica);
 }));
 
-router.post('/reset-password', authRateLimiter, asyncHandler(async (req, res) => {
+router.post('/reset-password', resetPasswordRateLimiter, asyncHandler(async (req, res) => {
   const dados = validate(resetPasswordSchema, req.body);
 
   const [[usuario]] = await pool.execute(
@@ -301,7 +316,7 @@ router.post('/reset-password', authRateLimiter, asyncHandler(async (req, res) =>
       [novaSenhaHash, usuario.id],
     );
     await conexao.execute(
-      'UPDATE redefinicao_senha SET utilizado_em=NOW() WHERE usuario_id=? AND utilizado_em IS NULL',
+      'UPDATE redefinicao_senha SET utilizado_em=UTC_TIMESTAMP() WHERE usuario_id=? AND utilizado_em IS NULL',
       [usuario.id],
     );
     return true;
@@ -348,7 +363,7 @@ router.put('/profile', authenticate, asyncHandler(async (req, res) => {
   res.json({ message: 'Perfil atualizado.' });
 }));
 
-router.put('/password', authenticate, authRateLimiter, asyncHandler(async (req, res) => {
+router.put('/password', authenticate, changePasswordRateLimiter, asyncHandler(async (req, res) => {
   const data = validate(z.object({
     senhaAtual: z.string().min(1),
     novaSenha: passwordSchema,

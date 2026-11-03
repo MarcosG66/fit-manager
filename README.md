@@ -144,3 +144,17 @@ Leia **`docs/PUBLICACAO_FINAL.md`** para um passo a passo detalhado, incluindo a
 - A compatibilidade com hospedagem depende das configurações reais do provedor, versão do MySQL e disponibilidade do serviço externo. O deploy não foi realizado a partir deste pacote.
 
 **Documentação recomendada:** `docs/REQUISITOS_FINAIS.md`, `docs/BANCO_MYSQL.md`, `docs/PUBLICACAO_FINAL.md`, `docs/GUIA_APRESENTACAO_FINAL.md`, `docs/TESTES_FINAIS.md`.
+
+
+## Revisão pré-publicação
+
+Esta edição incorpora correções de autenticação, consistência de interface, carregamento de listas, tratamento de falhas do MySQL e segurança de administração. Veja [docs/AUDITORIA_PRE_PUBLICACAO.md](docs/AUDITORIA_PRE_PUBLICACAO.md) para os achados, testes executados e limitações.
+
+```bash
+npm run audit     # testes estáticos e unitários, sem banco
+npm run build     # compilação de produção, com dependências instaladas
+npm run db:check  # com MySQL ativo
+npm run test:e2e  # API em execução; apenas em banco de TESTE
+```
+
+**Importante:** o código foi revisado, mas o build e E2E devem passar no seu ambiente antes de publicar. Não use `test:e2e` no MySQL de produção.

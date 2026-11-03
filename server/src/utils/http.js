@@ -56,6 +56,16 @@ export function errorHandler(error, req, res, next) {
     });
   }
 
+  // Se o MySQL estiver desligado, o cliente recebe um erro operacional claro
+  // em vez de confundir a falha de infraestrutura com credenciais inválidas.
+  if (['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN',
+       'PROTOCOL_CONNECTION_LOST', 'ER_CON_COUNT_ERROR'].includes(error.code)) {
+    console.error('[DB] Conexão indisponível:', error.code);
+    return res.status(503).json({
+      error: 'Banco de dados indisponível. Confira a conexão e tente novamente.',
+    });
+  }
+
   if (error.status) {
     return res.status(error.status).json({ error: error.message });
   }

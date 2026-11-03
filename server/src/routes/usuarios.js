@@ -32,15 +32,23 @@ router.patch('/:id/ativo', asyncHandler(async (req, res) => {
     throw new HttpError(400, 'Não é permitido desativar sua própria conta.');
   }
   await transaction(async connection => {
+    // Bloqueia as linhas administrativas em ordem estável ANTES de consultar o
+    // usuário-alvo. Evita que dois administradores desativem um ao outro ao
+    // mesmo tempo, deixando o sistema sem nenhum administrador ativo.
+    let administradoresAtivos;
+    if (!ativo) {
+      const [administradores] = await connection.query(
+        "SELECT id,ativo FROM usuario WHERE perfil='admin' ORDER BY id FOR UPDATE",
+      );
+      administradoresAtivos = administradores.filter(item => Boolean(item.ativo)).length;
+    }
+
     const [[target]] = await connection.execute(
       'SELECT perfil,ativo FROM usuario WHERE id=? FOR UPDATE', [targetId],
     );
     if (!target) throw new HttpError(404, 'Usuário não encontrado.');
-    if (target.perfil === 'admin' && !ativo && target.ativo) {
-      const [[record]] = await connection.query(
-        "SELECT COUNT(*) AS total FROM usuario WHERE perfil='admin' AND ativo=1",
-      );
-      if (record.total < 2) throw new HttpError(409, 'É necessário manter pelo menos um administrador ativo.');
+    if (target.perfil === 'admin' && !ativo && target.ativo && administradoresAtivos <= 1) {
+      throw new HttpError(409, 'É necessário manter pelo menos um administrador ativo.');
     }
     await connection.execute(
       'UPDATE usuario SET ativo=?,token_version=token_version+1 WHERE id=?',

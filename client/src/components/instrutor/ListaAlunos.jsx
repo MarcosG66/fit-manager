@@ -113,7 +113,7 @@ export default function ListaAlunos({ alunos, reload, goToTreinos }) {
                   <button className="icon-btn" title="Ativar / inativar" onClick={() => toggleStatus(a)}>
                     <i className="bi bi-person-gear" />
                   </button>
-                  <button className="icon-btn" title="Fichas de treino" onClick={goToTreinos}>
+                  <button className="icon-btn" title="Fichas de treino" onClick={() => goToTreinos(a.id)}>
                     <i className="bi bi-clipboard2-pulse" />
                   </button>
                   <button className="icon-btn danger" title="Excluir aluno" onClick={() => remove(a)}>

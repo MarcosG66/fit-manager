@@ -38,6 +38,11 @@ async function main() {
     method: 'POST', account: 'instrutor', expect: 201,
     body: { nome: 'Instrutor de Teste', email: instructorEmail, senha: password, perfil: 'instrutor' },
   });
+  // Login inválido e política de acesso público são testados antes do CRUD.
+  await request('/auth/login', { method: 'POST', expect: 401,
+    body: { email: instructorEmail, senha: 'senha-incorreta' } });
+  await request('/usuarios/totais', { expect: 401 });
+
   const link = await request('/vinculos/me', { account: 'instrutor' });
   assert.match(link.data.codigo, /^[A-F0-9]{12}$/);
 
@@ -50,6 +55,12 @@ async function main() {
   const students = await request('/alunos', { account: 'instrutor' });
   const student = students.data.find(record => record.email === studentEmail);
   assert.ok(student, 'O aluno recém-cadastrado deveria estar vinculado ao instrutor.');
+
+  // O aluno não pode administrar o catálogo nem criar fichas.
+  await request('/grupos', { method: 'POST', account: 'aluno', expect: 403,
+    body: { nome: `GrupoNegado${unique}` } });
+  await request('/fichas', { method: 'POST', account: 'aluno', expect: 403,
+    body: { aluno_id: student.id, nome: 'Treino Inadequado', dia_semana: 1, itens: [] } });
 
   const group = await request('/grupos', {
     method: 'POST', account: 'instrutor', expect: 201, body: { nome: `Grupo ${unique}` },
@@ -76,12 +87,36 @@ async function main() {
     method: 'PUT', account: 'aluno', body: { item_ficha_id: itemId, concluido: true },
   });
   await request('/fichas/' + workout.id, { method: 'DELETE', account: 'instrutor' });
+  const archivedList = await request('/fichas', { account: 'aluno' });
+  assert.ok(!archivedList.data.some(record => record.id === workout.id),
+    'Uma ficha arquivada não pode aparecer na lista de treinos ativos.');
   const history = await request('/cargas', { account: 'aluno' });
   assert.ok(history.data.some(record => record.item_ficha_id === itemId), 'O histórico não pode sumir ao arquivar fichas.');
 
   await request('/usuarios', { account: 'aluno', expect: 403 });
   const me = await request('/auth/me', { account: 'aluno' });
   assert.equal(me.user.perfil, 'aluno');
+
+  // Alterar o perfil e a senha não pode mudar o papel do usuário. O JWT antigo
+  // é invalidado pela mudança de token_version, mesmo antes do prazo de expiração.
+  await request('/auth/profile', { method: 'PUT', account: 'aluno',
+    body: { nome: 'Aluno Revisado', email: studentEmail, objetivo: 'Evolução', plano: 'Mensal' } });
+  const updatedProfile = await request('/auth/profile', { account: 'aluno' });
+  assert.equal(updatedProfile.data.nome, 'Aluno Revisado');
+  assert.equal(updatedProfile.data.perfil, 'aluno');
+  const novaSenha = `${password}Novo`;
+  await request('/auth/password', { method: 'PUT', account: 'aluno',
+    body: { senhaAtual: password, novaSenha } });
+  await request('/auth/me', { account: 'aluno', expect: 401 });
+  await request('/auth/login', { method: 'POST', expect: 401,
+    body: { email: studentEmail, senha: password } });
+  const novoLogin = await request('/auth/login', { method: 'POST', account: 'aluno',
+    body: { email: studentEmail, senha: novaSenha } });
+  assert.equal(novoLogin.user.perfil, 'aluno');
+
+  await request('/auth/register', { method: 'POST', expect: 403,
+    body: { nome: 'Admin Sem Convite', email: `admin-negado-${unique}@example.test`,
+      senha: password, perfil: 'admin', codigoAdmin: 'convite-incorreto' } });
 
   if (process.env.ADMIN_SIGNUP_CODE?.length >= 24) {
     await request('/auth/register', {
@@ -92,7 +127,7 @@ async function main() {
     const totals = await request('/usuarios/totais', { account: 'admin' });
     assert.ok(totals.data.admin >= 1);
   }
-  console.log('✅ TESTE E2E PASSOU: banco, 3 perfis, vínculo, ficha, cargas, histórico e permissões.');
+  console.log('✅ TESTE E2E PASSOU: banco, cadastro, login inválido, vínculo, ficha, cargas, arquivamento, histórico e permissões.');
   console.log('Contas de teste criadas: ', instructorEmail, studentEmail);
 }
 main().catch(error => { console.error('❌ Teste E2E falhou:', error.message); process.exitCode = 1; });

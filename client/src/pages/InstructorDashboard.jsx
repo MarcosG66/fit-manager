@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import PainelLayout from '../components/PainelLayout.jsx';
-import { Loading } from '../components/Feedback.jsx';
+import { Loading, Feedback } from '../components/Feedback.jsx';
 import CatalogoExercicios from '../components/CatalogoExercicios.jsx';
 import ListaAlunos from '../components/instrutor/ListaAlunos.jsx';
 import GestaoTreinos from '../components/instrutor/GestaoTreinos.jsx';
@@ -30,12 +30,14 @@ const TITULOS_SECOES = {
 
 export default function InstructorDashboard() {
   const [secaoAtiva, setSecaoAtiva] = useState('alunos');
+  const [alunoSelecionado, setAlunoSelecionado] = useState(null);
 
   // Lista de alunos consultada uma vez e compartilhada com a gestão de treinos.
   const {
     data: alunos,
     reload: recarregarAlunos,
     loading: carregandoAlunos,
+    error: erroAlunos,
   } = useResource('/alunos');
 
   function renderizarSecao() {
@@ -47,11 +49,14 @@ export default function InstructorDashboard() {
           <ListaAlunos
             alunos={alunos}
             reload={recarregarAlunos}
-            goToTreinos={() => setSecaoAtiva('treinos')}
+            goToTreinos={idAluno => {
+              setAlunoSelecionado(idAluno);
+              setSecaoAtiva('treinos');
+            }}
           />
         );
       case 'treinos':
-        return <GestaoTreinos alunos={alunos} />;
+        return <GestaoTreinos alunos={alunos} initialAlunoId={alunoSelecionado} />;
       case 'exercicios':
         return <CatalogoExercicios editable={false} />;
       case 'catalogo':
@@ -73,6 +78,7 @@ export default function InstructorDashboard() {
       title={TITULOS_SECOES[secaoAtiva]}
       tag="Painel do Instrutor"
     >
+      <Feedback error={erroAlunos} />
       {renderizarSecao()}
     </PainelLayout>
   );

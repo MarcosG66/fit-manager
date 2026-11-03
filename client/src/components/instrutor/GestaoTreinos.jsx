@@ -5,16 +5,16 @@ import Modal from '../Modal.jsx';
 import FormFicha from '../FormFicha.jsx';
 import { api } from '../../services/api.js';
 import { brDate, diaSemana } from '../../utils/format.js';
-export default function GestaoTreinos({ alunos }) {
-  const [alunoId, setAlunoId] = useState(''), [editing, setEditing] = useState(undefined), [error, setError] = useState(''), [success, setSuccess] = useState('');
+export default function GestaoTreinos({ alunos, initialAlunoId = null }) {
+  const [alunoId, setAlunoId] = useState(initialAlunoId || ''), [editing, setEditing] = useState(undefined), [error, setError] = useState(''), [success, setSuccess] = useState('');
   const selected = alunoId || alunos[0]?.id || '';
-  const { data: fichas, loading, reload } = useResource(selected ? `/fichas?aluno_id=${selected}` : null);
+  const { data: fichas, loading, error: erroConsulta, reload } = useResource(selected ? `/fichas?aluno_id=${selected}` : null);
   async function remove(f) {
-    if (!confirm(`Excluir a ficha "${f.nome}" e seu histórico de cargas?`))
+    if (!confirm(`Arquivar a ficha "${f.nome}"? O histórico de cargas será preservado.`))
       return; try {
         await api(`/fichas/${f.id}`, { method: 'DELETE' });
         reload();
-        setSuccess('Ficha excluída.');
+        setSuccess('Ficha arquivada. O histórico foi preservado.');
       }
     catch (e) {
       setError(e.message);
@@ -28,7 +28,7 @@ export default function GestaoTreinos({ alunos }) {
       </div>
       <button className="btn btn-primary" disabled={!alunos.length} onClick={() => setEditing(null)}><i className="bi bi-plus-lg me-1" />Criar ficha</button>
     </div>
-    <Feedback error={error} success={success} />
+    <Feedback error={error || erroConsulta} success={success} />
     <div className="surface-card mb-3">
       <label className="form-label small fw-semibold">Selecionar aluno</label>
       <select className="form-select" disabled={!alunos.length} value={selected} onChange={e => setAlunoId(e.target.value)}>
@@ -58,7 +58,7 @@ export default function GestaoTreinos({ alunos }) {
           </ul>
           <div className="d-flex gap-2">
             <button className="btn btn-outline-primary btn-sm" onClick={() => setEditing(f)}><i className="bi bi-pencil me-1" />Editar</button>
-            <button className="btn btn-outline-danger btn-sm" onClick={() => remove(f)}><i className="bi bi-trash me-1" />Excluir</button>
+            <button className="btn btn-outline-danger btn-sm" onClick={() => remove(f)}><i className="bi bi-trash me-1" />Arquivar</button>
           </div>
         </div>
       </div>)}

@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import CardExercicio from '../CardExercicio.jsx';
 import { Loading, Feedback, EmptyState } from '../Feedback.jsx';
 import { useResource } from '../../hooks/useResource.js';
-import { diaSemana } from '../../utils/format.js';
+import { diaSemana, weekdayInAcademyTimezone } from '../../utils/format.js';
 export default function TreinosAluno() {
   const { data: fichas, loading, error, reload } = useResource('/fichas');
   const [selected, setSelected] = useState(null);
   useEffect(() => {
     if (fichas.length && !fichas.some(f => f.id === selected))
-      setSelected(fichas.find(f => f.dia_semana === new Date().getDay())?.id || fichas[0].id);
+      setSelected(fichas.find(f => f.dia_semana === weekdayInAcademyTimezone())?.id || fichas[0].id);
   }, [fichas, selected]);
   const ficha = fichas.find(f => f.id === selected);
   const total = ficha?.itens.length || 0, done = ficha?.itens.filter(i => Boolean(i.concluido_hoje)).length || 0;

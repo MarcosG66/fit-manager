@@ -1,20 +1,23 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../services/api.js';
 
 /**
- * Carrega uma coleção da API e oferece uma função de atualização.
- * Exemplo: useResource('/alunos') retorna os alunos, loading, error e reload.
+ * Carrega coleções da API e ignora respostas antigas.
+ * Ao trocar o aluno selecionado, uma resposta tardia do aluno anterior
+ * não pode substituir os dados da seleção atual.
  */
 export function useResource(path) {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(path));
   const [error, setError] = useState('');
+  const requestId = useRef(0);
 
   const reload = useCallback(async () => {
-    // Quando o caminho é nulo, a busca deve ser ignorada.
-    // Exemplo: ainda não foi selecionado um aluno para consultar suas fichas.
+    const currentRequest = ++requestId.current;
+
     if (!path) {
       setData([]);
+      setError('');
       setLoading(false);
       return;
     }
@@ -24,17 +27,24 @@ export function useResource(path) {
 
     try {
       const response = await api(path);
-      setData(response.data ?? []);
+      if (currentRequest === requestId.current) {
+        setData(response.data ?? []);
+      }
     } catch (requestError) {
-      setError(requestError.message);
+      if (currentRequest === requestId.current) {
+        setData([]); // Nunca mostrar dados antigos após uma falha de autorização/rede.
+        setError(requestError.message);
+      }
     } finally {
-      setLoading(false);
+      if (currentRequest === requestId.current) {
+        setLoading(false);
+      }
     }
   }, [path]);
 
-  // A lista é buscada quando a página aparece ou o endereço consultado muda.
   useEffect(() => {
     reload();
+    return () => { requestId.current += 1; };
   }, [reload]);
 
   return { data, loading, error, reload, setData };

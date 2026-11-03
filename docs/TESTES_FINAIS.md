@@ -2,7 +2,7 @@
 
 ## Testes automatizados
 
-1. `npm run test`: verifica geração e unicidade de códigos de vínculo (sem banco).
+1. `npm run audit`: executa verificações estáticas e 12 testes unitários/contratos, incluindo recuperação de senha e limitadores (sem banco).
 2. `npm run build`: compila o React; exige `npm run install:all` antes.
 3. `npm run db:check`: confirma a conexão MySQL e a existência das tabelas.
 4. `npm run dev`: iniciar em um terminal.

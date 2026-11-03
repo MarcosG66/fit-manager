@@ -16,7 +16,8 @@
     "db:check": "npm run db:check --prefix server",
     "check": "npm run build && npm run db:check",
     "test": "npm run test --prefix server",
-    "test:e2e": "npm run test:e2e --prefix server"
+    "test:e2e": "npm run test:e2e --prefix server",
+    "audit": "node scripts/audit-static.mjs && npm run test"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

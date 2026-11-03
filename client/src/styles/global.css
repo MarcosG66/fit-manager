@@ -158,30 +158,7 @@ button {
   color: #344155;
   font-size: .87rem;
 }
-.role-select {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: .55rem;
-}
-.role-chip {
-  border: 1.5px solid #e0e6f1;
-  border-radius: 12px;
-  padding: .75rem .2rem;
-  background: #fff;
-  color: #64748b;
-  font-size: .75rem;
-  font-weight: 600;
-  transition: .2s;
-}
-.role-chip.selected {
-  border-color: #2563eb;
-  background: #2563eb;
-  color: white;
-  box-shadow: 0 7px 19px #2563eb30;
-}
-.role-chip:not(.selected):hover {
-  border-color: #93c5fd;
-}
+
 .tiny-note {
   font-size: .73rem;
   color: #94a3b8;
@@ -768,10 +745,8 @@ button {
   .auth-card {
     padding: 0;
   }
-  .role-chip {
-    font-size: .69rem;
-  }
-  .student-content {
+
+.student-content {
     padding-left: .85rem;
     padding-right: .85rem;
   }

@@ -24,6 +24,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
   const aid = id(req.params.id);
   await canAccessStudent(req.user, aid);
   const [[row]] = await pool.execute(`${query} AND a.id=?`, [await instructorForUser(req.user), aid]);
+  if (!row) throw new HttpError(404, 'Aluno não encontrado.');
   res.json({ data: row });
 }));
 router.post('/', asyncHandler(async (req, res) => {

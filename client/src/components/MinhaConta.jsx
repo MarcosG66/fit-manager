@@ -7,6 +7,8 @@ import { Feedback, Loading } from './Feedback.jsx';
 export default function MinhaConta() {
   const { user, refresh, logout } = useAuth();
   const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [password, setPassword] = useState({ senhaAtual: '', novaSenha: '', confirmar: '' });
   const [feedback, setFeedback] = useState({ error: '', success: '' });
   const [saving, setSaving] = useState(false);
@@ -14,8 +16,9 @@ export default function MinhaConta() {
   useEffect(() => {
     api('/auth/profile')
       .then(response => setProfile(response.data))
-      .catch(error => setFeedback({ error: error.message, success: '' }));
-  }, []);
+      .catch(error => setFeedback({ error: error.message, success: '' }))
+      .finally(() => setLoadingProfile(false));
+  }, [loadAttempt]);
 
   const update = (field, value) => setProfile(previous => ({ ...previous, [field]: value }));
 
@@ -59,7 +62,17 @@ export default function MinhaConta() {
     }
   }
 
-  if (!profile) return <><Feedback {...feedback} /><Loading /></>;
+  if (loadingProfile) return <Loading />;
+  if (!profile) return (
+    <div className="surface-card">
+      <Feedback {...feedback} />
+      <button className="btn btn-outline-primary" type="button" onClick={() => {
+        setLoadingProfile(true);
+        setFeedback({ error: '', success: '' });
+        setLoadAttempt(attempt => attempt + 1);
+      }}>Tentar carregar meu perfil novamente</button>
+    </div>
+  );
   return (
     <div className="row g-3">
       <div className="col-12"><Feedback {...feedback} /></div>

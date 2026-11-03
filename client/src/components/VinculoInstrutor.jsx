@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 export default function VinculoInstrutor() {
   const { user } = useAuth();
   const [connection, setConnection] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [code, setCode] = useState('');
   const [feedback, setFeedback] = useState({ error: '', success: '' });
   const [busy, setBusy] = useState(false);
@@ -17,6 +18,8 @@ export default function VinculoInstrutor() {
       setConnection(response.data);
     } catch (error) {
       setFeedback({ error: error.message, success: '' });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -38,7 +41,16 @@ export default function VinculoInstrutor() {
     }
   }
 
-  if (!connection) return <><Feedback {...feedback} /><Loading /></>;
+  if (loading) return <Loading />;
+  if (!connection) return (
+    <div className="surface-card">
+      <Feedback {...feedback} />
+      <button type="button" className="btn btn-outline-primary" onClick={() => {
+        setLoading(true);
+        reload();
+      }}>Tentar carregar o vínculo novamente</button>
+    </div>
+  );
   if (user.perfil === 'instrutor') {
     return <section className="surface-card">
       <h2 className="section-title">Meu código de instrutor</h2>
