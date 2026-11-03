@@ -47,8 +47,26 @@ const tables = [...schema.matchAll(/CREATE TABLE IF NOT EXISTS\s+([a-z_]+)/gi)].
 if (tables.length !== 11 || new Set(tables).size !== 11) {
   findings.push(`Esquema esperado: 11 tabelas distintas; obtidas: ${tables.length}.`);
 }
-for (const path of ['server/.env', 'client/.env', 'CONTAS_LOCAIS.txt']) {
-  if (existsSync(join(root, path))) findings.push(`Arquivo privado presente no pacote: ${path}`);
+const privateFiles = [
+  'server/.env',
+  'client/.env',
+  'CONTAS_LOCAIS.txt',
+];
+
+const trackedFiles = execFileSync(
+  'git',
+  ['ls-files', '--cached', '--full-name'],
+  { cwd: root, encoding: 'utf8' }
+)
+  .split(/\r?\n/)
+  .filter(Boolean);
+
+for (const privateFile of privateFiles) {
+  if (trackedFiles.includes(privateFile)) {
+    findings.push(
+      `Arquivo privado versionado no Git: ${privateFile}`
+    );
+  }
 }
 if (findings.length) {
   console.error('AUDITORIA ESTÁTICA FALHOU:');
