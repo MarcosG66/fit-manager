@@ -2,8 +2,6 @@
 
 **Versão final 2.0 — Etapa 3 — Ciência da Computação, Unifor**
 
-> **CONFIDENCIAL — PARA O PROFESSOR/AVALIADOR. NÃO PUBLICAR NO GITHUB OU EM LINK PÚBLICO.** Este documento contém um código que autoriza a criação de contas com acesso administrativo. Entregue somente como arquivo privado na atividade do AVA. Após a avaliação, substitua o código na hospedagem.
-
 ## Acesso ao sistema
 
 - **Site da aplicação:** https://fitmanager-final.onrender.com/login
