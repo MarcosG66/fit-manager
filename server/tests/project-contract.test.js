@@ -65,3 +65,35 @@ test('o tutorial existe como rota pública e pode ser acessado a partir de todos
     assert.match(component, /to="\/tutorial"/);
   }
 });
+
+
+test('instrutor e administrador compartilham um único catálogo de exercícios', () => {
+  const instrutor = read('client/src/pages/InstructorDashboard.jsx');
+  const admin = read('client/src/pages/AdminDashboard.jsx');
+  const catalogo = read('client/src/components/CatalogoExercicios.jsx');
+  const tutorial = read('client/src/pages/TutorialPage.jsx');
+
+  assert.doesNotMatch(instrutor, /Banco de Exercícios|id: 'exercicios'/);
+  assert.equal((instrutor.match(/id: 'catalogo'/g) ?? []).length, 1);
+  assert.match(instrutor, /id: 'catalogo', label: 'Catálogo de Exercícios', icon: 'bi-journal-text'/);
+  assert.match(admin, /id: 'catalogo', label: 'Catálogo de Exercícios', icon: 'bi-journal-text'/);
+  assert.doesNotMatch(tutorial, /Banco de Exercícios/);
+  assert.match(catalogo, /Gerenciar grupos/);
+  assert.match(catalogo, /Novo exercício/);
+});
+
+test('catálogo unificado mantém operações de exercícios e grupos na API original', () => {
+  const interfaceCatalogo = read('client/src/components/CatalogoExercicios.jsx');
+  const rotas = read('server/src/routes/catalogo.js');
+  const ficha = read('client/src/components/FormFicha.jsx');
+
+  assert.match(interfaceCatalogo, /api\('\/grupos', \{ method: 'POST'/);
+  assert.match(interfaceCatalogo, /api\(`\/grupos\/\$\{grupoEmEdicao\}`/);
+  assert.match(interfaceCatalogo, /api\(`\/grupos\/\$\{grupo\.id\}`/);
+  assert.match(interfaceCatalogo, /api\(exercicio \? `\/exercicios\/\$\{exercicio\.id\}` : '\/exercicios'/);
+  assert.match(interfaceCatalogo, /api\(`\/exercicios\/\$\{exercicio\.id\}`/);
+  for (const rota of ["'/grupos'", "'/grupos/:id'", "'/exercicios'", "'/exercicios/:id'"]) {
+    assert.ok(rotas.includes(rota), `Rota existente preservada: ${rota}`);
+  }
+  assert.match(ficha, /useResource\('\/exercicios'\)/);
+});

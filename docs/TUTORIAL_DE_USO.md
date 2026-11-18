@@ -28,6 +28,10 @@ Abra `http://localhost:5173/tutorial` e confirme os links a partir dos painéis.
 - `client/src/styles/global.css` — layout responsivo.
 - `server/tests/project-contract.test.js` — verificação estrutural de acesso.
 
+## Catálogo unificado
+
+Instrutor e administrador utilizam uma única entrada **Catálogo de Exercícios** (ícone de livro). Nessa seção ficam a busca, filtro, criação e edição dos exercícios, além do botão **Gerenciar grupos**, que permite adicionar e administrar grupos musculares. A antiga seção duplicada *Banco de Exercícios* foi removida.
+
 ## Limites
 
 O tutorial descreve os fluxos existentes; não oferece vídeos, visitas guiadas interativas nem execução automática de tarefas. A recuperação de senha por e-mail depende de um provedor configurado na hospedagem.

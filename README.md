@@ -265,3 +265,7 @@ A recuperação de senha na nuvem exige um serviço de e-mail real configurado (
 Consulte os arquivos em `docs/`: `REQUISITOS_FINAIS.md`, `BANCO_MYSQL.md`, `PUBLICACAO_FINAL.md`, `GUIA_APRESENTACAO_FINAL.md`, `TESTES_FINAIS.md` e `AUDITORIA_PRE_PUBLICACAO.md`.
 
 > **Segurança:** este README é público e não contém senhas ou códigos de administrador. As informações privadas para o avaliador devem ser entregues separadamente pelo AVA, e o código administrativo deve ser revogado ou alterado após a avaliação.
+
+## Atualização da navegação do catálogo
+
+O painel do instrutor e o do administrador utilizam uma única seção **Catálogo de Exercícios** (ícone de livro) para consultar, cadastrar, editar e excluir exercícios e para gerenciar os grupos musculares. A antiga entrada duplicada “Banco de Exercícios” foi removida. As rotas REST e a estrutura MySQL permanecem inalteradas. Consulte `docs/ATUALIZACAO_CATALOGO.md`.

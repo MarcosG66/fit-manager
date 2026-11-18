@@ -11,7 +11,7 @@ import { brDate } from '../utils/format.js';
 
 const MENU = [
   { id: 'usuarios', label: 'Usuários', icon: 'bi-people' },
-  { id: 'catalogo', label: 'Catálogo de Exercícios', icon: 'bi-dumbbell' },
+  { id: 'catalogo', label: 'Catálogo de Exercícios', icon: 'bi-journal-text' },
   { id: 'conta', label: 'Minha Conta', icon: 'bi-person-circle' },
 ];
 const TITLES = { usuarios: 'Gestão de Usuários', catalogo: 'Catálogo de Exercícios', conta: 'Minha Conta' };
@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   return <PainelLayout items={MENU} active={section} onChange={setSection}
     title={TITLES[section]} tag="Painel do Administrador">
     {section === 'usuarios' ? <UserManagement /> : section === 'catalogo'
-      ? <CatalogoExercicios editable /> : <MinhaConta />}
+      ? <CatalogoExercicios /> : <MinhaConta />}
   </PainelLayout>;
 }
 

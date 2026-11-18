@@ -13,8 +13,7 @@ import { useResource } from '../hooks/useResource.js';
 const ITENS_MENU = [
   { id: 'alunos', label: 'Meus Alunos', icon: 'bi-people' },
   { id: 'treinos', label: 'Criar / Gerenciar Treinos', icon: 'bi-clipboard2-pulse' },
-  { id: 'exercicios', label: 'Banco de Exercícios', icon: 'bi-journal-text' },
-  { id: 'catalogo', label: 'Catálogo de Exercícios', icon: 'bi-dumbbell' },
+  { id: 'catalogo', label: 'Catálogo de Exercícios', icon: 'bi-journal-text' },
   { id: 'vinculos', label: 'Meu Código', icon: 'bi-link-45deg' },
   { id: 'conta', label: 'Minha Conta', icon: 'bi-person-circle' },
 ];
@@ -22,7 +21,6 @@ const ITENS_MENU = [
 const TITULOS_SECOES = {
   alunos: 'Meus Alunos',
   treinos: 'Fichas de Treino',
-  exercicios: 'Banco de Exercícios',
   catalogo: 'Catálogo de Exercícios',
   vinculos: 'Vincular Alunos',
   conta: 'Minha Conta',
@@ -57,10 +55,8 @@ export default function InstructorDashboard() {
         );
       case 'treinos':
         return <GestaoTreinos alunos={alunos} initialAlunoId={alunoSelecionado} />;
-      case 'exercicios':
-        return <CatalogoExercicios editable={false} />;
       case 'catalogo':
-        return <CatalogoExercicios editable />;
+        return <CatalogoExercicios />;
       case 'vinculos':
         return <VinculoInstrutor />;
       case 'conta':

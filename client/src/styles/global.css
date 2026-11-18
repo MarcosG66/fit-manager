@@ -422,6 +422,10 @@ button {
   display: flex;
   flex-direction: column;
 }
+.catalog-groups-list {
+  max-height: 340px;
+  overflow-y: auto;
+}
 .exercise-icon {
   display: grid;
   place-items: center;
