@@ -53,27 +53,35 @@ const privateFiles = [
   'CONTAS_LOCAIS.txt',
 ];
 
-const trackedFiles = execFileSync(
-  'git',
-  ['ls-files', '--cached', '--full-name'],
-  { cwd: root, encoding: 'utf8' }
-)
-  .split(/\r?\n/)
-  .filter(Boolean);
+let trackedFiles = null;
+try {
+  // Também funciona quando o projeto já foi clonado do GitHub.
+  trackedFiles = execFileSync(
+    'git',
+    ['ls-files', '--cached', '--full-name'],
+    { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+  ).split(/\r?\n/).filter(Boolean);
+} catch {
+  // Um ZIP extraído não possui .git. Nesse caso, não é possível afirmar
+  // se segredos estão rastreados; a checagem deve ser repetida antes do push.
+  console.warn('Aviso: repositório Git ausente; verificação de arquivos rastreados ignorada.');
+}
 
-for (const privateFile of privateFiles) {
-  if (trackedFiles.includes(privateFile)) {
-    findings.push(
-      `Arquivo privado versionado no Git: ${privateFile}`
-    );
+if (trackedFiles) {
+  for (const privateFile of privateFiles) {
+    if (trackedFiles.includes(privateFile)) {
+      findings.push(`Arquivo privado versionado no Git: ${privateFile}`);
+    }
   }
 }
+
 if (findings.length) {
   console.error('AUDITORIA ESTÁTICA FALHOU:');
   findings.forEach(item => console.error('-', item));
   process.exitCode = 1;
 } else {
   console.log(`OK: ${checkedJs} arquivos JS/MJS, ${checkedImports} imports locais e ${tables.length} tabelas.`);
-  console.log('OK: sem credenciais locais nem seletor de perfil fictício no login.');
+  console.log(trackedFiles ? 'OK: arquivos privados não rastreados pelo Git.' : 'AVISO: verifique os arquivos privados antes do git add/push.');
+  console.log('OK: seletor de perfil fictício ausente no login.');
   console.log('Nota: o build JSX e testes MySQL exigem dependências instaladas e banco ativo.');
 }

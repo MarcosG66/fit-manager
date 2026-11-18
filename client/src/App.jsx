@@ -9,6 +9,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 import StudentDashboard from './pages/StudentDashboard.jsx';
 import InstructorDashboard from './pages/InstructorDashboard.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import TutorialPage from './pages/TutorialPage.jsx';
 
 // Cada perfil só pode abrir seu respectivo painel.
 const PAGINA_INICIAL_POR_PERFIL = {
@@ -56,6 +57,9 @@ function AppRoutes() {
       <Route path="/cadastro" element={<PublicRoute><RegisterPage /></PublicRoute>} />
       <Route path="/esqueci-senha" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
       <Route path="/redefinir-senha" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
+
+      {/* Tutorial público: disponível também para quem ainda não tem conta. */}
+      <Route path="/tutorial" element={<TutorialPage />} />
 
       {/* Páginas privadas: a API verifica as mesmas permissões no servidor. */}
       <Route path="/aluno" element={<PrivateRoute role="aluno"><StudentDashboard /></PrivateRoute>} />

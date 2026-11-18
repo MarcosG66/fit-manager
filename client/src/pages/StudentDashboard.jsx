@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
 import Brand from '../components/Brand.jsx';
@@ -57,7 +58,11 @@ export default function StudentDashboard() {
             <div className="d-flex align-items-center gap-3">
               <Perfil user={user} compact />
             </div>
-            <div className="d-flex gap-2">
+            <div className="d-flex align-items-center gap-2">
+              <Link to="/tutorial" className="btn student-help" aria-label="Abrir tutorial de uso" title="Como usar o FitManager">
+                <i className="bi bi-question-circle" aria-hidden="true" />
+                <span className="d-none d-sm-inline ms-1">Ajuda</span>
+              </Link>
               <div className="d-none d-sm-block">
                 <Brand light />
               </div>

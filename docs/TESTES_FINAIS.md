@@ -52,3 +52,12 @@
 - [ ] MySQL remoto persiste as alterações após reiniciar o serviço.
 
 > O ambiente que gerou este pacote não conseguiu concluir a instalação das dependências e **não executou testes de integração com um servidor MySQL**. Este checklist é requisito de validação da entrega.
+
+## Tutorial (alteração posterior à entrega 2.0)
+
+- [ ] Abrir `/tutorial` sem estar autenticado e conferir os três guias.
+- [ ] Alternar entre Aluno, Instrutor e Administrador e verificar os passos específicos.
+- [ ] Confirmar link na página de login/cadastro e no painel de cada perfil.
+- [ ] Entrar diretamente em `/tutorial` e atualizar a página (inclusive na hospedagem).
+- [ ] Validar o layout em 360 px, 390 px, 768 px e desktop.
+- [ ] Confirmar ausência de senhas, segredos ou código de administrador no tutorial.

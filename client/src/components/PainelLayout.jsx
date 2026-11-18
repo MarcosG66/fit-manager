@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import BarraLateral from './BarraLateral.jsx';
@@ -14,7 +15,10 @@ export default function PainelLayout({ items, active, onChange, title, tag, chil
         <h1>
           {title}
         </h1>
-        <span className="header-tag ms-auto">
+        <Link to="/tutorial" className="btn btn-outline-primary btn-sm app-help-button ms-auto" aria-label="Abrir tutorial de uso">
+          <i className="bi bi-question-circle me-1" aria-hidden="true" />Como usar
+        </Link>
+        <span className="header-tag">
           {tag}
         </span>
       </header>

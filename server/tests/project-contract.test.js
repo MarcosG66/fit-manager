@@ -46,3 +46,22 @@ test('o serviço em nuvem usa API e interface no mesmo processo', () => {
   assert.match(yaml, /buildCommand:/);
   assert.match(yaml, /startCommand:/);
 });
+
+
+test('o tutorial existe como rota pública e pode ser acessado a partir de todos os perfis', () => {
+  const app = read('client/src/App.jsx');
+  const tutorial = read('client/src/pages/TutorialPage.jsx');
+  const authLayout = read('client/src/components/AuthLayout.jsx');
+  const student = read('client/src/pages/StudentDashboard.jsx');
+  const sidebar = read('client/src/components/BarraLateral.jsx');
+  const layout = read('client/src/components/PainelLayout.jsx');
+
+  assert.match(app, /path="\/tutorial" element=\{<TutorialPage \/>\}/);
+  assert.match(tutorial, /aluno: \{/);
+  assert.match(tutorial, /instrutor: \{/);
+  assert.match(tutorial, /admin: \{/);
+  assert.match(tutorial, /aria-pressed/);
+  for (const component of [authLayout, student, sidebar, layout]) {
+    assert.match(component, /to="\/tutorial"/);
+  }
+});

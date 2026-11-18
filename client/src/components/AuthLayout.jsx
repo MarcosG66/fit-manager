@@ -26,6 +26,12 @@ export default function AuthLayout({ children }) {
           </Link>
         </div>
         {children}
+        <div className="text-center mt-4">
+          <Link to="/tutorial" className="tutorial-help-link">
+            <i className="bi bi-question-circle me-2" aria-hidden="true" />
+            Primeiro acesso? Veja como usar o FitManager
+          </Link>
+        </div>
       </div>
     </section>
   </div>;

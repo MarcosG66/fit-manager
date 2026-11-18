@@ -771,3 +771,71 @@ button {
   .student-bottom-button { font-size: .63rem; gap: .15rem; }
   .student-bottom-button .bi { font-size: 1.05rem !important; }
 }
+
+
+/* Tutorial: guia público e responsivo para os três perfis. */
+.tutorial-page { min-height: 100vh; background: #f5f7fd; color: #17243b; }
+.tutorial-topbar { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem max(1.5rem, calc((100vw - 1080px) / 2)); background: #fff; border-bottom: 1px solid var(--fm-border); }
+.tutorial-brand-link { text-decoration: none; }
+.tutorial-top-actions { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: flex-end; }
+.tutorial-container { max-width: 1080px; margin: 0 auto; padding: 1.8rem 1.25rem 4rem; }
+.tutorial-hero { padding: clamp(2rem, 6vw, 4rem); border-radius: 24px; color: white; background: radial-gradient(circle at 95% 0%, #3e8cff 0, transparent 32%), linear-gradient(120deg, #173a86, #2563eb); margin-bottom: 1.4rem; }
+.tutorial-eyebrow { font-size: .76rem; font-weight: 800; letter-spacing: .12em; color: #cfe2ff; margin-bottom: 1rem; }
+.tutorial-hero h1 { font-size: clamp(1.9rem, 4.3vw, 3rem); font-weight: 800; letter-spacing: -.04em; }
+.tutorial-hero p { max-width: 610px; font-size: 1.04rem; line-height: 1.65; color: #e0ebff; margin-bottom: 1.6rem; }
+.tutorial-hero-link { color: #19479a; font-weight: 700; }
+.tutorial-overview { display: flex; gap: 1.25rem; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--fm-border); padding: 1.6rem; border-radius: 20px; margin-bottom: 2.6rem; }
+.tutorial-overview h2 { font-size: 1.24rem; font-weight: 700; margin: 0 0 .55rem; }
+.tutorial-overview p { color: #506079; line-height: 1.7; margin: 0; max-width: 790px; }
+.tutorial-overview-icon { width: 65px; min-width: 65px; height: 65px; border-radius: 18px; background: #eff6ff; color: #2563eb; font-size: 1.8rem; display: grid; place-items: center; }
+.tutorial-section-heading { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.tutorial-section-kicker { color: #2563eb; font-weight: 800; letter-spacing: .1em; font-size: .7rem; margin-bottom: .35rem; }
+.tutorial-section-heading h2 { margin: 0; font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 700; }
+.tutorial-steps-count { color: #65738a; font-size: .82rem; }
+.tutorial-profile-selector { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; margin-bottom: 1.35rem; }
+.tutorial-profile-button { min-height: 56px; border: 1px solid #d9e3f3; background: #fff; border-radius: 13px; color: #334155; font-weight: 700; display: flex; gap: .65rem; align-items: center; justify-content: center; }
+.tutorial-profile-button i { font-size: 1.15rem; }
+.tutorial-profile-button.active { background: #2563eb; border-color: #2563eb; color: #fff; box-shadow: 0 6px 22px rgba(37, 99, 235, .15); }
+.tutorial-profile-button:focus-visible, .tutorial-faq-item summary:focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
+.tutorial-guide-intro { margin-bottom: 1rem; }
+.tutorial-guide-intro h3 { font-size: 1.13rem; font-weight: 700; margin-bottom: .35rem; }
+.tutorial-guide-intro p { color: #64748b; margin: 0; }
+.tutorial-steps { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; list-style: none; }
+.tutorial-step { display: flex; gap: 1rem; padding: 1.4rem; background: #fff; border: 1px solid var(--fm-border); border-radius: 17px; min-height: 138px; }
+.tutorial-step-number { min-width: 34px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #1d4ed8; background: #eff6ff; font-weight: 800; }
+.tutorial-step h4 { font-size: 1rem; font-weight: 700; margin: .3rem 0 .5rem; }
+.tutorial-step p { font-size: .89rem; line-height: 1.65; color: #576781; margin: 0; }
+.tutorial-tip { display: flex; gap: .85rem; align-items: flex-start; background: #eaf2ff; border: 1px solid #bfd4fb; border-radius: 14px; padding: 1rem 1.25rem; margin-top: 1.1rem; color: #1d4389; }
+.tutorial-tip i { font-size: 1.25rem; }
+.tutorial-tip p { margin: 0; line-height: 1.55; }
+.tutorial-faq { margin-top: 3rem; }
+.tutorial-faq-list { display: grid; gap: .65rem; }
+.tutorial-faq-item { background: #fff; border: 1px solid var(--fm-border); border-radius: 13px; }
+.tutorial-faq-item summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; list-style: none; padding: 1.1rem 1.25rem; cursor: pointer; font-weight: 700; }
+.tutorial-faq-item summary::-webkit-details-marker { display: none; }
+.tutorial-faq-item[open] summary i { transform: rotate(180deg); }
+.tutorial-faq-item p { padding: 0 1.25rem 1.15rem; margin: 0; line-height: 1.7; color: #64748b; }
+.tutorial-finish { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; margin-top: 3rem; background: #fff; border: 1px solid var(--fm-border); border-radius: 20px; padding: 1.65rem; }
+.tutorial-finish h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: .35rem; }
+.tutorial-finish p { margin: 0; color: #65738a; }
+.tutorial-footer { text-align: center; padding: 1.5rem; border-top: 1px solid var(--fm-border); color: #8490a4; font-size: .8rem; }
+.tutorial-help-link { font-size: .85rem; text-decoration: none; font-weight: 600; }
+.tutorial-sidebar-link { color: #45628f; margin-top: .5rem; border-top: 1px solid #edf2fb; padding-top: 1rem; }
+.student-help { color: white; border: 1px solid rgba(255,255,255,.45); border-radius: 11px; font-size: .85rem; }
+.student-help:hover, .student-help:focus-visible { background: rgba(255,255,255,.16); color: white; }
+@media (max-width: 680px) {
+  .tutorial-topbar { padding: .9rem 1rem; }
+  .tutorial-topbar .brand { font-size: 1rem; }
+  .tutorial-topbar .brand-logo { width: 30px; height: 30px; }
+  .tutorial-container { padding: 1rem 1rem 3rem; }
+  .tutorial-overview-icon { display: none; }
+  .tutorial-steps { grid-template-columns: 1fr; }
+  .tutorial-step { min-height: unset; }
+  .tutorial-hero { border-radius: 18px; }
+}
+@media (max-width: 390px) {
+  .tutorial-profile-button { flex-direction: column; gap: .25rem; font-size: .77rem; }
+  .tutorial-profile-button i { font-size: 1rem; }
+  .tutorial-top-actions .btn { padding: .4rem .55rem; font-size: .75rem; }
+  .app-help-button { font-size: .75rem; }
+}

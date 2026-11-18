@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import Brand from './Brand.jsx';
 import Perfil from './Perfil.jsx';
 export default function BarraLateral({ user, items, active, onChange, onLogout, open, onClose }) {
@@ -14,6 +15,9 @@ export default function BarraLateral({ user, items, active, onChange, onLogout, 
             <i className={`bi ${item.icon}`} />
             {item.label}
           </button>)}
+          <Link to="/tutorial" className="sidebar-link tutorial-sidebar-link" onClick={onClose}>
+            <i className="bi bi-question-circle" aria-hidden="true" />Tutorial de uso
+          </Link>
         </nav>
       </div>
       <div className="sidebar-footer">
